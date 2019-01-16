@@ -1,8 +1,9 @@
 var mqtt = require('mqtt')
-var client  = mqtt.connect('mqtt://localhost:1883')
+var client = mqtt.connect('mqtt://localhost:1883')
 const express = require('express');
 const app = express();
-const low = require('lowdb')
+const low = require('lowdb');
+const moment = require('moment');
 const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('db.json')
 const db = low(adapter)
@@ -11,8 +12,28 @@ var uuid = require('uuid');
 db.defaults({ posts: [], user: {}, count: 0 })
   .write()
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.get('/', (req, res) => {
-    res.send(db.get('posts'));
+  res.send(db.get('posts'));
+});
+
+app.get('/temp', (req, res) => {
+  const data = db.get('posts').cloneDeep().value();
+  let temp = [];
+  data.forEach(obj =>
+    temp.push(
+      {
+        temp: obj.temp,
+        time: moment(obj.time)
+      }
+    )
+  )
+  res.send(temp);
 });
 
 client.on('connect', function () {
@@ -22,7 +43,7 @@ client.on('connect', function () {
     }
   })
 })
- 
+
 client.on('message', function (topic, message) {
   // message is Buffer
   // console.log(message.toString())
@@ -30,12 +51,12 @@ client.on('message', function (topic, message) {
   try {
     var json = JSON.parse(stringBuf);
     console.log(json);
-      // Add a post
+    // Add a post
     db.get('posts')
-        .push({ id: uuid.v1(), temp: json.temperature_C, humidity: json.humidity, time: json.time })
-        .write()
+      .push({ id: uuid.v1(), temp: json.temperature_C, humidity: json.humidity, time: json.time })
+      .write()
     db.update('count', n => n + 1)
-        .write()  
+      .write()
   } catch (e) {
     console.log(stringBuf);
   }

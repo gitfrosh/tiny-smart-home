@@ -43,23 +43,7 @@ export default {
   data() {
     return {
       leftDrawerOpen: this.$q.platform.is.desktop,
-      info: null
     };
-  },
-  mounted() {
-    this.$axios
-      .get("http://localhost:3000/")
-      .then(response => {
-        this.info = response.data;
-      })
-      .catch(() => {
-        this.$q.notify({
-          color: "negative",
-          position: "top",
-          message: "Loading failed",
-          icon: "report_problem"
-        });
-      });
   },
   methods: {
     openURL
