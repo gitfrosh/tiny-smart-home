@@ -13,6 +13,11 @@ export default {
     }
   },
   mounted() {
-    this.renderChart(this.datacollection, this.options, {responsive: true})
+    this.renderChart(this.datacollection, this.options, { responsive: true })
+  },
+  watch: {
+    datacollection: function () {
+      this.renderChart(this.datacollection, this.options, { responsive: true })
+    }, deep: true
   }
 }

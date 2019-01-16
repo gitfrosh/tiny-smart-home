@@ -17,7 +17,7 @@
           <q-card-actions align="center">
             <q-btn-toggle
               v-model="toggle_temp"
-              v-on:input="chooseTemp"
+              v-on:input="chooseTemp($event, 'temp')"
               toggle-color="primary"
               :options="[
                 {label: 'all', value: 'all'},
@@ -45,6 +45,20 @@
               :options="options_humidity"
             ></line-chart>
           </q-card-main>
+          <q-card-separator/>
+          <q-card-actions align="center">
+            <q-btn-toggle
+              v-model="toggle_humidity"
+              v-on:input="chooseTemp($event, 'humidity')"
+              toggle-color="primary"
+              :options="[
+                {label: 'all', value: 'all'},
+                {label: 'month', value: 'month'},
+                {label: 'week', value: 'week'},
+                {label: 'today', value: 'today'}
+              ]"
+            />
+          </q-card-actions>
         </q-card>
       </div>
     </div>
@@ -67,6 +81,9 @@ export default {
       loaded: false,
       toggle_temp: "all",
       toggle_humidity: "all",
+      datacollection_humidity: null,
+      fetcheddatacollection: null,
+      datacollection_temp: null,
       startOfToday: moment().startOf("day"),
       startOfLastWeek: moment()
         .subtract(7, "days")
@@ -84,13 +101,44 @@ export default {
   },
   methods: {
     // fillData() {},
-    // addExpenses() {},
-    chooseTemp(e) {
-      console.log("dfsad", e);
-      this.fetchData();
+    filterData(id, event) {
+      if (id === "temp") {
+        const datacollection_temp = {
+          labels: this.fetcheddatacollection
+            .filter(obj => moment(obj.time).isAfter(this.getTempFilter()))
+            .map(obj => obj.time),
+          datasets: [
+            {
+              label: "Temperature",
+              backgroundColor: "#f87979",
+              data: this.fetcheddatacollection
+                .filter(obj => moment(obj.time).isAfter(this.getTempFilter()))
+                .map(obj => obj.temp)
+            }
+          ]
+        };
+        this.datacollection_temp = datacollection_temp;
+      }
+      if (id === "humidity") {
+        const datacollection_humidity = {
+          labels: this.fetcheddatacollection
+            .filter(obj => moment(obj.time).isAfter(this.getTempFilter()))
+            .map(obj => obj.time),
+          datasets: [
+            {
+              label: "Humidity",
+              backgroundColor: "#000",
+              data: this.fetcheddatacollection.map(obj => obj.humidity)
+            }
+          ]
+        };
+        this.datacollection_humidity = datacollection_humidity;
+      }
+    },
+    chooseTemp(event, id) {
+      this.filterData(id, event);
     },
     getTempFilter() {
-      console.log(this.startOfToday);
       switch (this.toggle_temp) {
         case "all":
           return moment("1970-01-01");
@@ -118,20 +166,14 @@ export default {
           return response.data;
         })
         .then(response => {
+          this.fetcheddatacollection = response;
           const datacollection_temp = {
-            labels: response
-              .filter(obj => {
-                console.log(moment(obj.time), this.getTempFilter());
-                return moment(obj.time).isAfter(this.getTempFilter())
-              })
-              .map(obj => obj.time),
+            labels: response.map(obj => obj.time),
             datasets: [
               {
                 label: "Temperature",
                 backgroundColor: "#f87979",
-                data: response
-                  .filter(obj => moment(obj.time).isAfter(this.getTempFilter()))
-                  .map(obj => obj.temp)
+                data: response.map(obj => obj.temp)
               }
             ]
           };
