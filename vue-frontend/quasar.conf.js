@@ -20,6 +20,13 @@ module.exports = function (ctx) {
     supportIE: false,
     build: {
       scopeHoisting: true,
+      env: ctx.dev
+        ? { // so on dev we'll have
+          API: JSON.stringify('http://localhost:3000/api')
+        }
+        : { // and on build (production):
+          API: JSON.stringify('https://tsh-server.herokuapp.com/api')
+        }
       // vueRouterMode: 'history',
       // vueCompiler: true,
       // gzip: true,
@@ -124,7 +131,7 @@ module.exports = function (ctx) {
     },
     electron: {
       // bundler: 'builder', // or 'packager'
-      extendWebpack (cfg) {
+      extendWebpack(cfg) {
         // do something with Electron process Webpack cfg
       },
       packager: {
