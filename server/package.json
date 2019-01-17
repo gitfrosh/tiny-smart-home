@@ -4,6 +4,7 @@
   "description": "Tiny Smart Home Vue.js Server",
   "author": "Rike <hello@ueberdiespree.de>",
   "main": "server.js",
+  "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build",
   "dependencies": {
     "connect-history-api-fallback": "^1.6.0",
     "express": "^4.16.4",

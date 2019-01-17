@@ -11,6 +11,9 @@ const uuid = require('uuid');
 const serveStatic = require('serve-static');
 const history = require('connect-history-api-fallback');
 
+var serverPort = 3000;
+var port = process.env.PORT || serverPort;
+
 db.defaults({ posts: [], user: {}, count: 0 })
   .write()
 
@@ -52,5 +55,5 @@ client.on('message', function (topic, message) {
 })
 
 app.use(history());
-app.use(serveStatic('../vue-frontend/dist/spa-mat'));
-app.listen(3000, () => console.log('Gator app listening on port 3000!'));
+app.use(serveStatic(__dirname + '/dist/spa-mat'));
+app.listen(port, () => console.log('App listening on port ', port));
