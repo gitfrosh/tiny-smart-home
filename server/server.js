@@ -1,13 +1,15 @@
-var mqtt = require('mqtt')
-var client = mqtt.connect('mqtt://localhost:1883')
+const mqtt = require('mqtt')
+const client = mqtt.connect('mqtt://localhost:1883')
 const express = require('express');
 const app = express();
 const low = require('lowdb');
-const moment = require('moment');
+// const moment = require('moment');
 const FileSync = require('lowdb/adapters/FileSync')
-const adapter = new FileSync('db.json')
-const db = low(adapter)
-var uuid = require('uuid');
+const adapter = new FileSync('db.json');
+const db = low(adapter);
+const uuid = require('uuid');
+const serveStatic = require('serve-static');
+const history = require('connect-history-api-fallback');
 
 db.defaults({ posts: [], user: {}, count: 0 })
   .write()
@@ -18,22 +20,8 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send(db.get('posts'));
-});
-
-app.get('/temp', (req, res) => {
-  const data = db.get('posts').cloneDeep().value();
-  let temp = [];
-  data.forEach(obj =>
-    temp.push(
-      {
-        temp: obj.temp,
-        time: moment(obj.time)
-      }
-    )
-  )
-  res.send(temp);
 });
 
 client.on('connect', function () {
@@ -46,26 +34,23 @@ client.on('connect', function () {
 
 client.on('message', function (topic, message) {
   // message is Buffer
-  // console.log(message.toString())
   var stringBuf = message && message.toString('utf-8')
   try {
     var json = JSON.parse(stringBuf);
     console.log(json);
     // Add a post
-    db.get('posts')
-      .push({ id: uuid.v1(), temp: json.temperature_C, humidity: json.humidity, time: json.time })
-      .write()
-    db.update('count', n => n + 1)
-      .write()
+    if (json.temperature_C && json.humidity) {
+      db.get('posts')
+        .push({ id: uuid.v1(), temp: json.temperature_C, humidity: json.humidity, time: json.time })
+        .write()
+      db.update('count', n => n + 1)
+        .write()
+    }
   } catch (e) {
     console.log(stringBuf);
   }
-
 })
 
-// Set a user using Lodash shorthand syntax
-// db.set('user.name', 'typicode')
-//   .write()
-
-
+app.use(history());
+app.use(serveStatic('../vue-frontend/dist/spa-mat'));
 app.listen(3000, () => console.log('Gator app listening on port 3000!'));

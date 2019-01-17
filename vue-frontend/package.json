@@ -1,8 +1,7 @@
 {
   "name": "vue-frontend",
   "version": "0.0.1",
-  "description": "Vue.js Smart Home Frontend",
-  "productName": "Quasar App",
+  "description": "Tiny Smart Home Vue.js Frontend",
   "cordovaId": "org.cordova.quasar.app",
   "author": "Rike <hello@ueberdiespree.de>",
   "private": true,

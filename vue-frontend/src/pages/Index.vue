@@ -105,14 +105,20 @@ export default {
       if (id === "temp") {
         const datacollection_temp = {
           labels: this.fetcheddatacollection
-            .filter(obj => moment(obj.time).isAfter(this.getTempFilter()))
+            .filter(obj =>
+              moment(obj.time).isAfter(this.getFilter(this.toggle_temp))
+            )
             .map(obj => obj.time),
           datasets: [
             {
+              fill: false,
               label: "Temperature",
+              // showLine: false
               backgroundColor: "#f87979",
               data: this.fetcheddatacollection
-                .filter(obj => moment(obj.time).isAfter(this.getTempFilter()))
+                .filter(obj =>
+                  moment(obj.time).isAfter(this.getFilter(this.toggle_temp))
+                )
                 .map(obj => obj.temp)
             }
           ]
@@ -122,13 +128,20 @@ export default {
       if (id === "humidity") {
         const datacollection_humidity = {
           labels: this.fetcheddatacollection
-            .filter(obj => moment(obj.time).isAfter(this.getTempFilter()))
+            .filter(obj =>
+              moment(obj.time).isAfter(this.getFilter(this.toggle_humidity))
+            )
             .map(obj => obj.time),
           datasets: [
             {
+              fill: false,
               label: "Humidity",
-              backgroundColor: "#000",
-              data: this.fetcheddatacollection.map(obj => obj.humidity)
+              backgroundColor: "#57a6db",
+              data: this.fetcheddatacollection
+                .filter(obj =>
+                  moment(obj.time).isAfter(this.getFilter(this.toggle_humidity))
+                )
+                .map(obj => obj.humidity)
             }
           ]
         };
@@ -138,8 +151,8 @@ export default {
     chooseTemp(event, id) {
       this.filterData(id, event);
     },
-    getTempFilter() {
-      switch (this.toggle_temp) {
+    getFilter(option) {
+      switch (option) {
         case "all":
           return moment("1970-01-01");
           break;
@@ -156,12 +169,11 @@ export default {
           return "";
       }
     },
-    getHumidityFilter() {},
     fetchData() {
       this.loaded = false;
 
       this.$axios
-        .get("http://localhost:3000")
+        .get("http://localhost:3000/api")
         .then(response => {
           return response.data;
         })
@@ -172,18 +184,17 @@ export default {
             datasets: [
               {
                 label: "Temperature",
-                backgroundColor: "#f87979",
+                borderColor: "#f87979",
                 data: response.map(obj => obj.temp)
               }
             ]
           };
-          console.log(datacollection_temp);
           const datacollection_humidity = {
             labels: response.map(obj => obj.time),
             datasets: [
               {
                 label: "Humidity",
-                backgroundColor: "#000",
+                borderColor: "#000",
                 data: response.map(obj => obj.humidity)
               }
             ]
@@ -204,6 +215,7 @@ export default {
                     display: true
                   },
                   ticks: {
+                    beginAtZero: true,
                     callback: function(value, index, values) {
                       return value + "%";
                     }
