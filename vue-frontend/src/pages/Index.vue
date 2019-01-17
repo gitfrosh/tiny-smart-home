@@ -171,9 +171,9 @@ export default {
     },
     fetchData() {
       this.loaded = false;
-      console.log("fetch ", process.env.API);
+      console.log("fetch ", process.env.ROOT_URL + 'api');
       this.$axios
-        .get(process.env.API)
+        .get(process.env.ROOT_URL + 'api')
         .then(response => {
           return response.data;
         })

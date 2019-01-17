@@ -18,6 +18,10 @@
     >
       <q-list no-border link inset-delimiter>
         <q-list-header>Navigation</q-list-header>
+        <q-item to="/">
+          <q-item-side icon="home"/>
+          <q-item-main label="Home" sublabel="Go back"/>
+        </q-item>
         <q-item to="/settings">
           <q-item-side icon="view_array"/>
           <q-item-main label="Settings" sublabel="Whatever fits"/>
@@ -42,7 +46,7 @@ export default {
   name: "MyLayout",
   data() {
     return {
-      leftDrawerOpen: this.$q.platform.is.desktop,
+      leftDrawerOpen: this.$q.platform.is.desktop
     };
   },
   methods: {

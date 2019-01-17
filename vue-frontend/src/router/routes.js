@@ -1,3 +1,4 @@
+import Settings from 'pages/Settings'
 
 const routes = [
   {
@@ -6,7 +7,13 @@ const routes = [
     children: [
       { path: '', component: () => import('pages/Index.vue') },
     ],
-  },
+  }, {
+    path: '/settings',
+    component: () => import('layouts/MyLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/Settings.vue') },
+    ],
+  }
 ];
 
 // Always leave this as last one

@@ -22,10 +22,10 @@ module.exports = function (ctx) {
       scopeHoisting: true,
       env: ctx.dev
         ? { // so on dev we'll have
-          API: JSON.stringify('http://localhost:3000/api')
+          ROOT_URL: JSON.stringify('http://localhost:3000/')
         }
         : { // and on build (production):
-          API: JSON.stringify('https://tsh-server.herokuapp.com/api')
+          ROOT_URL: JSON.stringify('https://tsh-server.herokuapp.com/')
         }
       // vueRouterMode: 'history',
       // vueCompiler: true,
