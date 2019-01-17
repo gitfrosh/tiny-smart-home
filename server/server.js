@@ -1,5 +1,4 @@
 const mqtt = require('mqtt')
-const client = mqtt.connect('mqtt://localhost:1883')
 const express = require('express');
 const app = express();
 const low = require('lowdb');
@@ -10,9 +9,13 @@ const db = low(adapter);
 const uuid = require('uuid');
 const serveStatic = require('serve-static');
 const history = require('connect-history-api-fallback');
+const url = require('url');
 
-var serverPort = 3000;
-var port = process.env.PORT || serverPort;
+// define env variables
+const mqttUrl = url.parse(process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883');
+const port = process.env.PORT || 3000;
+
+const client = mqtt.connect(mqttUrl)
 
 db.defaults({ posts: [], user: {}, count: 0 })
   .write()
@@ -30,7 +33,7 @@ app.get('/api', (req, res) => {
 client.on('connect', function () {
   client.subscribe('home/rtl_433', function (err) {
     if (!err) {
-      client.publish('home/rtl_433', 'Hello mqtt')
+      client.publish('home/rtl_433', 'Hello! New mqtt subscriber. :)')
     }
   })
 })
@@ -50,7 +53,7 @@ client.on('message', function (topic, message) {
         .write()
     }
   } catch (e) {
-    console.log(stringBuf);
+    console.error(e);
   }
 })
 

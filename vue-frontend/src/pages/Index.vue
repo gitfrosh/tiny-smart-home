@@ -171,7 +171,7 @@ export default {
     },
     fetchData() {
       this.loaded = false;
-      console.log('fetch ', process.env.API)
+      console.log("fetch ", process.env.API);
       this.$axios
         .get(process.env.API)
         .then(response => {
@@ -194,7 +194,7 @@ export default {
             datasets: [
               {
                 label: "Humidity",
-                borderColor: "#000",
+                borderColor: "#57a6db",
                 data: response.map(obj => obj.humidity)
               }
             ]
