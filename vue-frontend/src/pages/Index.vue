@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="docs-input row justify-center">
     <div class="row gutter-sm">
-      <div class="col-6">
+      <div class="col-12 col-sm-6">
         <q-card inline style="max-width: 100%">
           <q-card-media style="max-height: 250px">
             <img src="~assets/temperature.jpg">
@@ -29,7 +29,7 @@
           </q-card-actions>
         </q-card>
       </div>
-      <div class="col-6">
+      <div class="col-12 col-sm-6">
         <q-card inline style="max-width: 100%">
           <q-card-media style="max-height: 250px">
             <img src="~assets/humidity.jpg">
