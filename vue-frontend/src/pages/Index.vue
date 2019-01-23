@@ -112,10 +112,21 @@ export default {
           datasets: [
             {
               fill: false,
-              label: "Temperature",
-              // showLine: false
+              label: "Temperature Child's Room",
+              backgroundColor: "#f87971",
+              data: this.fetcheddatacollection
+                .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
+                .filter(obj =>
+                  moment(obj.time).isAfter(this.getFilter(this.toggle_temp))
+                )
+                .map(obj => obj.temp)
+            },
+            {
+              fill: false,
+              label: "Temperature Sleeping Room",
               backgroundColor: "#f87979",
               data: this.fetcheddatacollection
+                .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
                 .filter(obj =>
                   moment(obj.time).isAfter(this.getFilter(this.toggle_temp))
                 )
@@ -135,9 +146,21 @@ export default {
           datasets: [
             {
               fill: false,
-              label: "Humidity",
+              label: "Humidity Child's Room",
               backgroundColor: "#57a6db",
               data: this.fetcheddatacollection
+                .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
+                .filter(obj =>
+                  moment(obj.time).isAfter(this.getFilter(this.toggle_humidity))
+                )
+                .map(obj => obj.humidity)
+            },
+            {
+              fill: false,
+              label: "Humidity Sleeping Room",
+              backgroundColor: "#57a65a",
+              data: this.fetcheddatacollection
+                .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
                 .filter(obj =>
                   moment(obj.time).isAfter(this.getFilter(this.toggle_humidity))
                 )
@@ -171,9 +194,9 @@ export default {
     },
     fetchData() {
       this.loaded = false;
-      console.log("fetch ", process.env.ROOT_URL + 'api');
+      console.log("fetch ", process.env.ROOT_URL + "api");
       this.$axios
-        .get(process.env.ROOT_URL + 'api')
+        .get(process.env.ROOT_URL + "api")
         .then(response => {
           return response.data;
         })
@@ -183,9 +206,20 @@ export default {
             labels: response.map(obj => obj.time),
             datasets: [
               {
-                label: "Temperature",
-                borderColor: "#f87979",
-                data: response.map(obj => obj.temp)
+                fill: false,
+                label: "Temperature Child's Room",
+                backgroundColor: "#f87971",
+                data: response
+                  .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
+                  .map(obj => obj.temp)
+              },
+              {
+                fill: false,
+                label: "Temperature Sleeping Room",
+                backgroundColor: "#ff9a35",
+                data: response
+                  .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
+                  .map(obj => obj.temp)
               }
             ]
           };
@@ -193,9 +227,20 @@ export default {
             labels: response.map(obj => obj.time),
             datasets: [
               {
-                label: "Humidity",
-                borderColor: "#57a6db",
-                data: response.map(obj => obj.humidity)
+                fill: false,
+                label: "Humidity Child's Room",
+                backgroundColor: "#57a6db",
+                data: response
+                  .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
+                  .map(obj => obj.humidity)
+              },
+              {
+                fill: false,
+                label: "Humidity Sleeping Room",
+                backgroundColor: "#57a65a",
+                data: response
+                  .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
+                  .map(obj => obj.humidity)
               }
             ]
           };

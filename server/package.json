@@ -10,6 +10,7 @@
     "express": "^4.16.4",
     "lowdb": "^1.0.0",
     "moment": "^2.23.0",
+    "moment-timezone": "^0.5.23",
     "mqtt": "^2.18.8",
     "serve-static": "^1.13.2",
     "uuid": "^3.3.2"

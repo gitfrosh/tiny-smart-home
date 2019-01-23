@@ -2,7 +2,7 @@ const mqtt = require('mqtt')
 const express = require('express');
 const app = express();
 const low = require('lowdb');
-// const moment = require('moment');
+const moment = require('moment-timezone');
 const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('db.json');
 const db = low(adapter);
@@ -15,7 +15,9 @@ const url = require('url');
 const mqttUrl = url.parse(process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883');
 const port = process.env.PORT || 3000;
 
-const client = mqtt.connect(mqttUrl)
+const client = mqtt.connect(mqttUrl);
+
+let lastTimestamp = moment.utc();
 
 db.defaults({ posts: [], user: {}, count: 0 })
   .write()
@@ -65,18 +67,25 @@ client.on('message', function (topic, message) {
   var stringBuf = message && message.toString('utf-8')
   try {
     var json = JSON.parse(stringBuf);
-    console.log(json);
+    // console.log(json);
     if (json.model === 'inFactory sensor') {
       if (json.id === 91 || json.id === 32) {
         // catch my specific sensor model
         if (json.temperature_F && json.humidity) {
           // add data to lowdb
+          // console.log(moment(lastTimestamp), moment(json.time))
+          const time = moment.utc(json.time).tz("Europe/Berlin");
+          // if (lastTimestamp < time.add(5, 'minutes')) {
+          lastTimestamp = json.time;
+          const formattedTime = time.format('YYYY-MM-DD HH:mm:ss');
+          console.log('write post');
           db.get('posts')
-            .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: json.time })
+            .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: formattedTime })
             .write()
           db.update('count', n => n + 1)
             .write()
         }
+        // }
       }
 
     }

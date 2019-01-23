@@ -22,10 +22,14 @@ module.exports = function (ctx) {
       scopeHoisting: true,
       env: ctx.dev
         ? { // so on dev we'll have
-          ROOT_URL: JSON.stringify('http://localhost:3000/')
+          ROOT_URL: JSON.stringify('http://localhost:3000/'),
+          SLEEPING_ROOM_ID: 91,
+          CHILDRENS_ROOM_ID: 32,
         }
         : { // and on build (production):
-          ROOT_URL: JSON.stringify('https://tsh-server.herokuapp.com/')
+          ROOT_URL: JSON.stringify('https://tsh-server.herokuapp.com/'),
+          SLEEPING_ROOM_ID: 91,
+          CHILDRENS_ROOM_ID: 32,
         }
       // vueRouterMode: 'history',
       // vueCompiler: true,
@@ -54,6 +58,7 @@ module.exports = function (ctx) {
         'QCardMain',
         'QCardMedia',
         'QCardSeparator',
+        'QBtnDropdown',
         'QCardActions',
         'QLayout',
         'QLayoutHeader',
