@@ -59,22 +59,22 @@ client.on('connect', function () {
 fahrenheitToCelsius = (fahrenheit) => {
   var fTempVal = parseFloat(fahrenheit);
   var cTempVal = (fTempVal - 32) * (5 / 9);
-  return (Math.round(cTempVal*100)/100);
+  return (Math.round(cTempVal * 100) / 100);
 }
 
 client.on('message', function (topic, message) {
-  counter = counter + 1;
   console.log(counter);
-  if (counter === 100) {
-    // message is Buffer
-    var stringBuf = message && message.toString('utf-8')
-    try {
-      var json = JSON.parse(stringBuf);
-      // console.log(json);
-      if (json.model === 'inFactory sensor') {
-        if (json.id === 91 || json.id === 32) {
-          // catch my specific sensor model
-          if (json.temperature_F && json.humidity) {
+  // message is Buffer
+  var stringBuf = message && message.toString('utf-8')
+  try {
+    var json = JSON.parse(stringBuf);
+    // console.log(json);
+    if (json.model === 'inFactory sensor') {
+      if (json.id === 91 || json.id === 32) {
+        // catch my specific sensor model
+        if (json.temperature_F && json.humidity) {
+          counter = counter + 1;
+          if (counter === 100) {
             // add data to lowdb
             const time = moment.utc(json.time).tz("Europe/Berlin");
             const formattedTime = time.format('YYYY-MM-DD HH:mm:ss');
@@ -86,12 +86,11 @@ client.on('message', function (topic, message) {
               .write()
             counter = 0;
           }
-
         }
       }
-    } catch (e) {
-      console.error(stringBuf);
     }
+  } catch (e) {
+    console.error(stringBuf);
   }
 
 })

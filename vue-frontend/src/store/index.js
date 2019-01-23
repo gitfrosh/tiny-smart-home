@@ -10,6 +10,8 @@ Vue.use(Vuex);
  * directly export the Store instantiation
  */
 
+window.Event = new Vue(); // create globally usable events
+
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {

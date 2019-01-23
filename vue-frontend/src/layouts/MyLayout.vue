@@ -9,6 +9,14 @@
         <q-toolbar-title>Tiny Smart Home
           <div slot="subtitle">Running on Quasar v{{ $q.version }}</div>
         </q-toolbar-title>
+        <q-btn
+          flat
+          round
+          dense
+          icon="update"
+          @click="refetch"
+          aria-label="Toggle menu on right side"
+        />
       </q-toolbar>
     </q-layout-header>
 
@@ -50,8 +58,11 @@ export default {
     };
   },
   methods: {
-    openURL
-  }
+    refetch: function() {
+      Event.$emit("refetchEvent");
+    }
+  },
+  openURL
 };
 </script>
 

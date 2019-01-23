@@ -94,7 +94,9 @@ export default {
     };
   },
   mounted() {
-    // this.fetchData();
+    Event.$on("refetchEvent", () => {
+      this.fetchData();
+    });
   },
   created() {
     this.fetchData();
@@ -112,25 +114,33 @@ export default {
           datasets: [
             {
               fill: false,
+              spanGaps: true,
               label: "Temperature Child's Room",
               backgroundColor: "#f87971",
               data: this.fetcheddatacollection
-                .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
                 .filter(obj =>
                   moment(obj.time).isAfter(this.getFilter(this.toggle_temp))
                 )
-                .map(obj => obj.temp)
+                .map(obj =>
+                  obj.room === process.env.CHILDRENS_ROOM_ID
+                    ? obj.temp
+                    : Number.NaN
+                )
             },
             {
               fill: false,
+              spanGaps: true,
               label: "Temperature Sleeping Room",
-              backgroundColor: "#f87979",
+              backgroundColor: "#ff9a35",
               data: this.fetcheddatacollection
-                .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
                 .filter(obj =>
                   moment(obj.time).isAfter(this.getFilter(this.toggle_temp))
                 )
-                .map(obj => obj.temp)
+                .map(obj =>
+                  obj.room === process.env.SLEEPING_ROOM_ID
+                    ? obj.temp
+                    : Number.NaN
+                )
             }
           ]
         };
@@ -146,25 +156,33 @@ export default {
           datasets: [
             {
               fill: false,
+              spanGaps: true,
               label: "Humidity Child's Room",
               backgroundColor: "#57a6db",
               data: this.fetcheddatacollection
-                .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
                 .filter(obj =>
                   moment(obj.time).isAfter(this.getFilter(this.toggle_humidity))
                 )
-                .map(obj => obj.humidity)
+                .map(obj =>
+                  obj.room === process.env.CHILDRENS_ROOM_ID
+                    ? obj.humidity
+                    : Number.NaN
+                )
             },
             {
               fill: false,
+              spanGaps: true,
               label: "Humidity Sleeping Room",
               backgroundColor: "#57a65a",
               data: this.fetcheddatacollection
-                .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
                 .filter(obj =>
                   moment(obj.time).isAfter(this.getFilter(this.toggle_humidity))
                 )
-                .map(obj => obj.humidity)
+                .map(obj =>
+                  obj.room === process.env.SLEEPING_ROOM_ID
+                    ? obj.humidity
+                    : Number.NaN
+                )
             }
           ]
         };
@@ -194,6 +212,8 @@ export default {
     },
     fetchData() {
       this.loaded = false;
+      this.toggle_temp = "all";
+      this.toggle_humidity = "all";
       console.log("fetch ", process.env.ROOT_URL + "api");
       this.$axios
         .get(process.env.ROOT_URL + "api")
@@ -203,44 +223,56 @@ export default {
         .then(response => {
           this.fetcheddatacollection = response;
           const datacollection_temp = {
-            labels: response.map(obj => obj.time),
+            labels: response.map(obj => (obj.time ? obj.time : Number.NaN)),
             datasets: [
               {
                 fill: false,
+                spanGaps: true,
                 label: "Temperature Child's Room",
                 backgroundColor: "#f87971",
-                data: response
-                  .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
-                  .map(obj => obj.temp)
+                data: response.map(obj =>
+                  obj.room === process.env.CHILDRENS_ROOM_ID
+                    ? obj.temp
+                    : Number.NaN
+                )
               },
               {
                 fill: false,
+                spanGaps: true,
                 label: "Temperature Sleeping Room",
                 backgroundColor: "#ff9a35",
-                data: response
-                  .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
-                  .map(obj => obj.temp)
+                data: response.map(obj =>
+                  obj.room === process.env.SLEEPING_ROOM_ID
+                    ? obj.temp
+                    : Number.NaN
+                )
               }
             ]
           };
           const datacollection_humidity = {
-            labels: response.map(obj => obj.time),
+            labels: response.map(obj => (obj.time ? obj.time : Number.NaN)),
             datasets: [
               {
                 fill: false,
+                spanGaps: true,
                 label: "Humidity Child's Room",
                 backgroundColor: "#57a6db",
-                data: response
-                  .filter(obj => obj.room === process.env.CHILDRENS_ROOM_ID)
-                  .map(obj => obj.humidity)
+                data: response.map(obj =>
+                  obj.room === process.env.CHILDRENS_ROOM_ID
+                    ? obj.humidity
+                    : Number.NaN
+                )
               },
               {
                 fill: false,
+                spanGaps: true,
                 label: "Humidity Sleeping Room",
                 backgroundColor: "#57a65a",
-                data: response
-                  .filter(obj => obj.room === process.env.SLEEPING_ROOM_ID)
-                  .map(obj => obj.humidity)
+                data: response.map(obj =>
+                  obj.room === process.env.SLEEPING_ROOM_ID
+                    ? obj.humidity
+                    : Number.NaN
+                )
               }
             ]
           };
