@@ -54,19 +54,31 @@ client.on('connect', function () {
   })
 })
 
+fahrenheitToCelsius = (fahrenheit) => {
+  var fTempVal = parseFloat(fahrenheit);
+  var cTempVal = (fTempVal - 32) * (5 / 9);
+  return cTempVal;
+}
+
 client.on('message', function (topic, message) {
   // message is Buffer
   var stringBuf = message && message.toString('utf-8')
   try {
     var json = JSON.parse(stringBuf);
     console.log(json);
-    // Add a post
-    if (json.temperature_C && json.humidity) {
-      db.get('posts')
-        .push({ id: uuid.v1(), temp: json.temperature_C, humidity: json.humidity, time: json.time })
-        .write()
-      db.update('count', n => n + 1)
-        .write()
+    if (json.model === 'inFactory sensor') {
+      if (json.id === 91 || json.id === 32) {
+        // catch my specific sensor model
+        if (json.temperature_F && json.humidity) {
+          // add data to lowdb
+          db.get('posts')
+            .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: json.time })
+            .write()
+          db.update('count', n => n + 1)
+            .write()
+        }
+      }
+
     }
   } catch (e) {
     console.error(stringBuf);
