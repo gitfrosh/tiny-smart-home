@@ -17,7 +17,7 @@ const port = process.env.PORT || 3000;
 
 const client = mqtt.connect(mqttUrl);
 
-let lastTimestamp = moment.utc();
+let counter = 0;
 
 db.defaults({ posts: [], user: {}, count: 0 })
   .write()
@@ -59,39 +59,41 @@ client.on('connect', function () {
 fahrenheitToCelsius = (fahrenheit) => {
   var fTempVal = parseFloat(fahrenheit);
   var cTempVal = (fTempVal - 32) * (5 / 9);
-  return cTempVal;
+  return (Math.round(cTempVal*100)/100);
 }
 
 client.on('message', function (topic, message) {
-  // message is Buffer
-  var stringBuf = message && message.toString('utf-8')
-  try {
-    var json = JSON.parse(stringBuf);
-    // console.log(json);
-    if (json.model === 'inFactory sensor') {
-      if (json.id === 91 || json.id === 32) {
-        // catch my specific sensor model
-        if (json.temperature_F && json.humidity) {
-          // add data to lowdb
-          // console.log(moment(lastTimestamp), moment(json.time))
-          const time = moment.utc(json.time).tz("Europe/Berlin");
-          // if (lastTimestamp < time.add(5, 'minutes')) {
-          lastTimestamp = json.time;
-          const formattedTime = time.format('YYYY-MM-DD HH:mm:ss');
-          console.log('write post');
-          db.get('posts')
-            .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: formattedTime })
-            .write()
-          db.update('count', n => n + 1)
-            .write()
-        }
-        // }
-      }
+  counter = counter + 1;
+  console.log(counter);
+  if (counter === 100) {
+    // message is Buffer
+    var stringBuf = message && message.toString('utf-8')
+    try {
+      var json = JSON.parse(stringBuf);
+      // console.log(json);
+      if (json.model === 'inFactory sensor') {
+        if (json.id === 91 || json.id === 32) {
+          // catch my specific sensor model
+          if (json.temperature_F && json.humidity) {
+            // add data to lowdb
+            const time = moment.utc(json.time).tz("Europe/Berlin");
+            const formattedTime = time.format('YYYY-MM-DD HH:mm:ss');
+            console.log('write post');
+            db.get('posts')
+              .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: formattedTime })
+              .write()
+            db.update('count', n => n + 1)
+              .write()
+            counter = 0;
+          }
 
+        }
+      }
+    } catch (e) {
+      console.error(stringBuf);
     }
-  } catch (e) {
-    console.error(stringBuf);
   }
+
 })
 
 app.use(history());
