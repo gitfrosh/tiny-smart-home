@@ -1,5 +1,6 @@
 const mqtt = require('mqtt')
 const express = require('express');
+const session = require('express-session');
 const app = express();
 const low = require('lowdb');
 const moment = require('moment-timezone');
@@ -11,7 +12,11 @@ const serveStatic = require('serve-static');
 const history = require('connect-history-api-fallback');
 const url = require('url');
 
+process.env.ROOT_URL = 'http://localhost:8080';
+// process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
+
 // define env variables
+const home_url = process.env.ROOT_URL;
 const mqttUrl = url.parse(process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883');
 const port = process.env.PORT || 3000;
 
@@ -24,28 +29,70 @@ db.defaults({ posts: [], user: {}, count: 0 })
 
 
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", home_url);
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
 
-app.get('/deleteData', (req, res) => {
-  try {
-    db.get('posts')
-      .remove()
-      .write()
-    db.update('count', 0)
-      .write()
-    res.end('Deleted data!');
-  } catch (e) {
-    res.send(e);
-    console.error(e);
+app.use(session({
+  secret: 'sailor-moon',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
+
+// Login endpoint
+app.get('/login', function (req, res) {
+  if (!req.query.username || !req.query.password) {
+    res.send('login failed');
+  } else if (req.query.username === "admin" && req.query.password === "tsh") {
+    req.session.user = "admin";
+    req.session.admin = true;
+    req.session.authenticated = true;
+    req.session.save();
+    console.log(req.session);
+    res.send("login success!");
+  } else {
+    res.send('login failed');
   }
+});
+
+// Logout endpoint
+app.get('/logout', function (req, res) {
+  req.session.destroy();
+  res.send("logout success!");
+});
+
+
+app.get('/deleteData', (req, res) => {
+  if (req.session && req.session.authenticated) {
+    try {
+      db.get('posts')
+        .remove()
+        .write()
+      db.update('count', 0)
+        .write()
+      res.end('Deleted data!');
+    } catch (e) {
+      res.send(e);
+      console.error(e);
+    }
+  } else {
+    return res.sendStatus(401);
+  }
+
 
 });
 
 app.get('/api', (req, res) => {
-  res.send(db.get('posts'));
+  if (req.session && req.session.authenticated) {
+    res.send(db.get('posts'));
+  } else {
+    return res.sendStatus(401);
+  }
+
 });
 
 client.on('connect', function () {
