@@ -38,6 +38,11 @@
           <q-item-side icon="pin_drop"/>
           <q-item-main label="About" sublabel="...this"/>
         </q-item>
+        <q-item-separator/>
+        <q-item @click.native="logout">
+          <q-item-side icon="logout"/>
+          <q-item-main label="Logout"/>
+        </q-item>
       </q-list>
     </q-layout-drawer>
 
@@ -60,6 +65,27 @@ export default {
   methods: {
     refetch: function() {
       Event.$emit("refetchEvent");
+    },
+    logout: function() {
+      console.log('dfsf')
+      this.$axios
+        .get(process.env.ROOT_URL + "logout")
+        .then(response => {
+          return response.data;
+        })
+        .then(response => {
+          console.log(response);
+          this.$emit("Login::loginResult", { loginResult: false });
+          this.$router.go('/'); 
+        })
+        .catch(e => {
+          this.$q.notify({
+            color: "negative",
+            position: "top",
+            message: "Could not logout",
+            icon: "report_problem"
+          });
+        });
     }
   },
   openURL

@@ -52,7 +52,7 @@ app.get('/login', function (req, res) {
     req.session.admin = true;
     req.session.authenticated = true;
     req.session.save();
-    console.log(req.session);
+    // console.log(req.session);
     res.send("login success!");
   } else {
     res.send('login failed');

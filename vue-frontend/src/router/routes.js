@@ -1,17 +1,29 @@
-import Settings from 'pages/Settings'
+import Settings from 'pages/Settings';
 
 const routes = [
   {
     path: '/',
+    name: 'home',
+    // component: () => import('layouts/MyLayout.vue'),
+    redirect: { name: 'dashboard' }
+  },
+  {
+    path: '/dashboard',
     component: () => import('layouts/MyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Index.vue') },
+      {
+        path: '', name: 'dashboard',
+        component: () => import('pages/Index.vue')
+      },
     ],
   }, {
     path: '/settings',
     component: () => import('layouts/MyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Settings.vue') },
+      {
+        path: '', name: 'settings',
+        component: () => import('pages/Settings.vue')
+      },
     ],
   }
 ];
