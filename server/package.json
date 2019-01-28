@@ -7,8 +7,11 @@
   "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build",
   "dependencies": {
     "connect-history-api-fallback": "^1.6.0",
+    "csv": "^5.1.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
+    "json2csv": "^4.3.3",
+    "jsonexport": "^2.4.1",
     "lowdb": "^1.0.0",
     "moment": "^2.23.0",
     "moment-timezone": "^0.5.23",

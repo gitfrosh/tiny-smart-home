@@ -4,6 +4,7 @@
 .thumbs.db
 */node_modules
 vue-frontend/dist
+*/db.csv
 *//src-cordova/node_modules
 *//src-cordova/platforms
 *//src-cordova/plugins

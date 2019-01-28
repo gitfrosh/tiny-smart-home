@@ -11,6 +11,8 @@ const uuid = require('uuid');
 const serveStatic = require('serve-static');
 const history = require('connect-history-api-fallback');
 const url = require('url');
+const jsonexport = require('jsonexport');
+const fs = require('fs');
 
 process.env.ROOT_URL = 'http://localhost:8080';
 // process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
@@ -65,6 +67,22 @@ app.get('/logout', function (req, res) {
   res.send("logout success!");
 });
 
+// download CSV
+app.get('/download', function (req, res) {
+  try {
+    var reader = fs.createReadStream('db.json');
+    var writer = fs.createWriteStream('db.csv');
+    var pipe = reader.pipe(jsonexport()).pipe(writer);
+
+    pipe.on('finish', function () {
+      var stream = fs.createReadStream('db.csv');
+      res.attachment('db.csv');
+      stream.pipe(res);
+    });
+  } catch (e) {
+    console.log(e)
+  }
+});
 
 app.get('/deleteData', (req, res) => {
   if (req.session && req.session.authenticated) {
