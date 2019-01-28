@@ -26,8 +26,8 @@ const client = mqtt.connect(mqttUrl);
 
 let counter = 0;
 
-// db.defaults({ posts: [], user: {}, count: 0 })
-//   .write()
+db.defaults({ posts: [], user: {} })
+  .write()
 
 
 app.use(function (req, res, next) {
@@ -90,8 +90,6 @@ app.get('/deleteData', (req, res) => {
       db.get('posts')
         .remove()
         .write()
-      db.update('count', 0)
-        .write()
       res.end('Deleted data!');
     } catch (e) {
       res.send(e);
@@ -146,8 +144,6 @@ client.on('message', function (topic, message) {
             console.log('write post');
             db.get('posts')
               .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: formattedTime })
-              .write()
-            db.update('count', n => n + 1)
               .write()
             counter = 0;
           }
