@@ -24,8 +24,8 @@ const client = mqtt.connect(mqttUrl);
 
 let counter = 0;
 
-db.defaults({ posts: [], user: {}, count: 0 })
-  .write()
+// db.defaults({ posts: [], user: {}, count: 0 })
+//   .write()
 
 
 app.use(function (req, res, next) {
