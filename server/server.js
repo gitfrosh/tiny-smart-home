@@ -13,14 +13,45 @@ const history = require('connect-history-api-fallback');
 const url = require('url');
 const jsonexport = require('jsonexport');
 const fs = require('fs');
+const Pool = require('pg').Pool;
 
-process.env.ROOT_URL = 'http://localhost:8080';
-// process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
+// IMPORTANT: change before deployment
+// process.env.ROOT_URL = 'http://localhost:8080';
+process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
 
 // define env variables
 const home_url = process.env.ROOT_URL;
 const mqttUrl = url.parse(process.env.CLOUDMQTT_URL || 'mqtt://localhost:1883');
 const port = process.env.PORT || 3000;
+// const postgres_url = process.env.DATABASE_URL || 'postgres://localhost:5432/tsh';
+
+// setup posgresql db connection
+let pool;
+if (process.env.ROOT_URL === 'http://localhost:8080') {
+  try {
+    pool = new Pool({
+      user: 'postgres',
+      host: 'localhost',
+      database: 'tsh',
+      password: 'password',
+      port: 5432,
+    })
+    pool.query("CREATE TABLE IF NOT EXISTS posts (id VARCHAR(100) PRIMARY KEY, room INT, temp VARCHAR(30), humidity VARCHAR(30), time VARCHAR(100))");
+  } catch (e) {
+    console.log(e)
+  }
+} else {
+  // connect to heroku on prod mode
+  try {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: true,
+    });
+    pool.query("CREATE TABLE IF NOT EXISTS posts (id VARCHAR(100) PRIMARY KEY, room INT, temp VARCHAR(30), humidity VARCHAR(30), time VARCHAR(100))");
+  } catch (e) {
+    console.log(e)
+  }
+}
 
 const client = mqtt.connect(mqttUrl);
 
@@ -104,11 +135,17 @@ app.get('/deleteData', (req, res) => {
 
 app.get('/api', (req, res) => {
   if (req.session && req.session.authenticated) {
-    res.send(db.get('posts'));
+    // implementation for lowdb
+    // res.send(db.get('posts'));
+    pool.query('SELECT * FROM posts', (error, results) => {
+      if (error) {
+        throw error
+      }
+      res.status(200).json(results.rows)
+    })
   } else {
     return res.sendStatus(401);
   }
-
 });
 
 client.on('connect', function () {
@@ -142,9 +179,18 @@ client.on('message', function (topic, message) {
             const time = moment.utc(json.time).tz("Europe/Berlin");
             const formattedTime = time.format('YYYY-MM-DD HH:mm:ss');
             console.log('write post');
-            db.get('posts')
-              .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: formattedTime })
-              .write()
+            // implementation for lowdb
+            // db.get('posts')
+            //   .push({ id: uuid.v1(), room: json.id, temp: fahrenheitToCelsius(json.temperature_F), humidity: json.humidity, time: formattedTime })
+            //   .write()
+            pool.query('INSERT INTO posts (id, room, temp, humidity, time) VALUES ($1, $2, $3, $4, $5)', [uuid.v1(), json.id, fahrenheitToCelsius(json.temperature_F), json.humidity, formattedTime], (error, results) => {
+              if (error) {
+                throw error
+              } else {
+                // console.log(results);
+
+              }
+            })
             counter = 0;
           }
         }
