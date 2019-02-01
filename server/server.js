@@ -17,8 +17,8 @@ const Pool = require('pg').Pool;
 var copyTo = require('pg-copy-streams').to;
 
 // IMPORTANT: change before deployment
-process.env.ROOT_URL = 'http://localhost:8080';
-// process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
+// process.env.ROOT_URL = 'http://localhost:8080';
+process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
 
 // define env variables
 const home_url = process.env.ROOT_URL;
