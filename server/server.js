@@ -11,13 +11,14 @@ const uuid = require('uuid');
 const serveStatic = require('serve-static');
 const history = require('connect-history-api-fallback');
 const url = require('url');
-const jsonexport = require('jsonexport');
+// const jsonexport = require('jsonexport');
 const fs = require('fs');
 const Pool = require('pg').Pool;
+var copyTo = require('pg-copy-streams').to;
 
 // IMPORTANT: change before deployment
-// process.env.ROOT_URL = 'http://localhost:8080';
-process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
+process.env.ROOT_URL = 'http://localhost:8080';
+// process.env.ROOT_URL = 'https://tsh-server.herokuapp.com';
 
 // define env variables
 const home_url = process.env.ROOT_URL;
@@ -48,6 +49,7 @@ if (process.env.ROOT_URL === 'http://localhost:8080') {
       ssl: true,
     });
     pool.query("CREATE TABLE IF NOT EXISTS posts (id VARCHAR(100) PRIMARY KEY, room INT, temp VARCHAR(30), humidity VARCHAR(30), time VARCHAR(100))");
+    console.log('connected to postgresql on heroku')
   } catch (e) {
     console.log(e)
   }
@@ -101,15 +103,21 @@ app.get('/logout', function (req, res) {
 // download CSV
 app.get('/download', function (req, res) {
   try {
-    var reader = fs.createReadStream('db.json');
+    // lowdb implementation
+    // var reader = fs.createReadStream('db.json');
     var writer = fs.createWriteStream('db.csv');
-    var pipe = reader.pipe(jsonexport()).pipe(writer);
+    // var pipe = reader.pipe(jsonexport()).pipe(writer);
 
-    pipe.on('finish', function () {
-      var stream = fs.createReadStream('db.csv');
-      res.attachment('db.csv');
-      stream.pipe(res);
-    });
+    pool.connect(function (pgErr, client, done) {
+      var stream = client.query(copyTo('COPY posts TO STDOUT'));
+      var pipe = stream.pipe(writer);
+      pipe.on('finish', function () {
+        var stream = fs.createReadStream('db.csv');
+        res.attachment('db.csv');
+        stream.pipe(res);
+      });
+    })
+
   } catch (e) {
     console.log(e)
   }
@@ -118,9 +126,10 @@ app.get('/download', function (req, res) {
 app.get('/deleteData', (req, res) => {
   if (req.session && req.session.authenticated) {
     try {
-      db.get('posts')
-        .remove()
-        .write()
+      // db.get('posts')
+      //   .remove()
+      //   .write()
+      pool.query("TRUNCATE TABLE posts");
       res.end('Deleted data!');
     } catch (e) {
       res.send(e);
@@ -129,8 +138,6 @@ app.get('/deleteData', (req, res) => {
   } else {
     return res.sendStatus(401);
   }
-
-
 });
 
 app.get('/api', (req, res) => {
@@ -188,7 +195,6 @@ client.on('message', function (topic, message) {
                 throw error
               } else {
                 // console.log(results);
-
               }
             })
             counter = 0;

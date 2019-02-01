@@ -17,6 +17,7 @@
     "moment-timezone": "^0.5.23",
     "mqtt": "^2.18.8",
     "pg": "^7.8.0",
+    "pg-copy-streams": "^1.2.0",
     "serve-static": "^1.13.2",
     "uuid": "^3.3.2"
   },
